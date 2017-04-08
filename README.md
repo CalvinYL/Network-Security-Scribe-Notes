@@ -4,33 +4,77 @@ title: Architecture of the Internet
 scribe: Calvin Liang
 ---
 
-# Architecture of the Internet
+# Architecture of the Internet (April 6, 2017 Lecture with Professor Crovella)
 
 **Internet Infrastructure**
 
-* Physical infrastructure consists of two hosts - one sending data to another who is receiving - and intermediate devices (ie. routers)
+* The physical infrastructure a network consists of two hosts where one host is sending data to another who is receiving (aka an end host) through the use of intermediate devices (ie. routers)
 * Anybody can be an ISP
 * Key components of the Internet:
-  * ISPs are typically referred to as "domains"
-    * Domain names like cs.bu.edu are converted into IP addresses
+  * Domain Name System
+    * Domain names like cs.bu.edu are converted IP addresses
   * The ability to find routes from one end of the Internet to another (ie. between hosts)
-    * Local and interdomain routing
       * TCP/IP used for routing and messaging
-      * BGP used for routing announcements
+      * BGP used for routing announcements (ie. exchanges of routing and reachability information between routers)
       
 **TCP**
 
 * Breakup of TCP Protocol Stack into subsystems (ie. layers):
 
-![TCP Protocol Stack](http://imgur.com/a/c99Wm)
+```
++----------------+                                             +----------------+ 
+|                |             Application Protocol            |                | 
+|  Application   |   <------------------------------------>    |  Application   |
+|                |                                             |                | 
++----------------+                                             +----------------+ 
+|                |                 TCP Protocol                |                | 
+|   Transport    |   <------------------------------------>    |   Transport    |     Port #
+|                |                                             |                | 
++----------------+                +-----------+                +----------------+  
+|                |   IP Protocol  |           |  IP Protocol   |                | 
+|    Network     |  <---------->  |    IP     |  <---------->  |    Network     |     IP Address
+|                |                |           |                |                | 
++----------------+                +-----------+                +----------------+  
+|                |      Data      |           |      Data      |                | 
+|      Link      |  <---------->  |  Network  |  <---------->  |      Link      |     MAC Address
+|                |      Link      |  Access   |      Link      |                | 
++----------------+                +-----------+                +----------------+  
+```
 
 * This demonstrates the communication process between corresponding layers on different systems
 * The flow of control/information in a network operates from top to bottom
 * A protocol is defined as a "precise set of messages exchanged to accomplish some purpose"
-* Data broken up into packets before being exchanged over the internet **PICTURE2**
+
+**Data Formats**
+```                              (TCP Header)
++----------------+                      |     +----------------------------------+
+|                |                      |     |    Application message - data    |
+|   Application  |   message            |     +----------------------------------+
+|                |                      |        |              |              |
++----------------+                      V        V              V              V
+|                |                    +-----+------+     +-----+------+     +-----+------+
+|    Transport   |   segment          | TCP | data |     | TCP | data |     | TCP | data |
+|                |                    +-----+------+     +-----+------+     +-----+------+
++----------------+                                             |              |
+|                |                                             V              V
+|  Network (IP)  |   packet                             +------+-------+------+
+|                |              (TCP encapsulated --->  |  IP  |  TCP  | data |
++----------------+                in an IP header)      +------+-------+------+
+|                |                                             |              |
+|   Link Layer   |   frame                                     V              V
+|                |                                +-----+------+-------+------+-----+
++----------------+                                | ETH |  IP  |  TCP  | data | ETF |
+                                                  +-----+------+-------+------+-----+
+                                                     ^                           ^
+                                                     |                           |
+                                               Link (Ethernet)              Link (Ethernet)
+                                                   Header                      Trailer                               
+```
+
+* Data is broken up into packets before being exchanged over the internet
   * The way packets are turned into actual protocols is through the use of headers
-  * TCP encapsulated into IP (ie. TCP packet put into an IP packet)
-* When applications exchange protocol messages
+  * This is done through encapsulation
+    * Example: TCP being encapsulated into IP is the same as saying a TCP packet is put into an IP packet
 * TCP segments become packets at the IP layer, which become messages at the Link layer
 * TCP contains "ports" which are designators of an application
   * Two in particular are the source and destination ports
